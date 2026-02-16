@@ -1,0 +1,51 @@
+<?php
+declare(strict_types=1);
+
+function db(): PDO
+{
+    static $pdo = null;
+    if ($pdo instanceof PDO) {
+        return $pdo;
+    }
+
+    $path = getenv('CHAT_DB_PATH') ?: '/data/chat.sqlite';
+    $dir = dirname($path);
+    if (!is_dir($dir)) {
+        mkdir($dir, 0775, true);
+    }
+
+    $pdo = new PDO('sqlite:' . $path, null, null, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    ]);
+
+    $pdo->exec('PRAGMA journal_mode = WAL;');
+    $pdo->exec('PRAGMA foreign_keys = ON;');
+
+    $pdo->exec('CREATE TABLE IF NOT EXISTS rooms (
+        room_hash TEXT PRIMARY KEY,
+        created_at INTEGER NOT NULL,
+        last_activity_at INTEGER NOT NULL
+    );');
+
+    $pdo->exec('CREATE TABLE IF NOT EXISTS participants (
+        token_hash TEXT PRIMARY KEY,
+        room_hash TEXT NOT NULL,
+        joined_at INTEGER NOT NULL,
+        FOREIGN KEY(room_hash) REFERENCES rooms(room_hash) ON DELETE CASCADE
+    );');
+
+    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_participants_room ON participants(room_hash);');
+
+    $pdo->exec('CREATE TABLE IF NOT EXISTS presence (
+        token_hash TEXT PRIMARY KEY,
+        room_hash TEXT NOT NULL,
+        last_seen INTEGER NOT NULL,
+        FOREIGN KEY(token_hash) REFERENCES participants(token_hash) ON DELETE CASCADE,
+        FOREIGN KEY(room_hash) REFERENCES rooms(room_hash) ON DELETE CASCADE
+    );');
+
+    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_presence_room ON presence(room_hash);');
+
+    return $pdo;
+}

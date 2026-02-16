@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+  --ink: #171613;
+  --ink-soft: #3a362f;
+  --paper: #f7f2e6;
+  --accent: #d64f2a;
+  --accent-dark: #b43d1f;
+  --border: rgba(23, 22, 19, 0.18);
+  --shadow: 0 14px 30px rgba(23, 22, 19, 0.12);
+}
+
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 64px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+.section {
+  border: 1px solid var(--border);
+  padding: 32px;
+  background: rgba(247, 242, 230, 0.7);
+  box-shadow: var(--shadow);
+}
+
+.hero {
+  padding: 48px 40px;
+  border-width: 2px;
+  background: linear-gradient(135deg, #f8f0df 0%, #f1e4cc 45%, #ead3b4 100%);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 12px;
+  margin: 0 0 16px;
+  color: var(--ink-soft);
+}
+
+h1 {
+  font-size: clamp(2.6rem, 4vw, 4rem);
+  line-height: 1.05;
+  margin: 0 0 16px;
+}
+
+h2 {
+  font-size: clamp(1.6rem, 2.2vw, 2.2rem);
+  margin: 0 0 12px;
+}
+
+p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.lead {
+  font-size: 1.25rem;
+  color: var(--ink);
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0;
+  padding: 12px 28px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: var(--ink);
+  color: #f6f0e8;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.cta:hover,
+.cta:focus {
+  background: var(--accent);
+  border-color: var(--accent-dark);
+  color: #fffaf3;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin-top: 28px;
+}
+
+.link {
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 2px;
+}
+
+.link:hover,
+.link:focus {
+  color: var(--accent);
+  border-color: var(--accent-dark);
+}
+
+.footer {
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  padding-bottom: 20px;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 48px 16px 64px;
+    gap: 32px;
+  }
+
+  .section,
+  .hero {
+    padding: 24px;
+  }
+
+  .cta {
+    width: 100%;
+  }
+}

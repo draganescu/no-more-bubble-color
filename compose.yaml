@@ -1,0 +1,15 @@
+services:
+  app:
+    build: .
+    ports:
+      - '8087:80'
+    environment:
+      - SERVER_NAME=:80
+      - MERCURE_PUBLISHER_JWT_KEY=!ChangeMe!
+      - MERCURE_SUBSCRIBER_JWT_KEY=!ChangeMe!
+      - MERCURE_HUB_URL=http://localhost/.well-known/mercure
+      - CHAT_DB_PATH=/data/chat.sqlite
+    volumes:
+      - ./data:/data
+      - ./server:/app/server
+      - ./public:/app/landing

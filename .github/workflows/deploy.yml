@@ -1,0 +1,24 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DO_SSH_KEY }}
+
+      - name: Deploy
+        env:
+          DO_HOST: ${{ secrets.DO_HOST }}
+          DO_USER: ${{ secrets.DO_USER }}
+          DO_APP_DIR: ${{ secrets.DO_APP_DIR }}
+          DO_SSH_PORT: ${{ secrets.DO_SSH_PORT }}
+        run: |
+          SSH_PORT=${DO_SSH_PORT:-22}
+          ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" "$DO_USER@$DO_HOST" "cd $DO_APP_DIR && ./scripts/deploy.sh"

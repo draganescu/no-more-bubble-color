@@ -1,0 +1,37 @@
+{
+	frankenphp
+	order mercure before php_server
+	order mercure before handle
+}
+
+{$SERVER_NAME} {
+	# Mercure Hub
+	mercure {
+		publisher_jwt !ChangeMe!
+		subscriber_jwt !ChangeMe!
+		anonymous
+	}
+
+	# PHP Backend API
+	@api path /api/*
+	handle @api {
+		route {
+			root * /app/server
+			php_server
+		}
+	}
+
+	# Landing page (static)
+	@landing path / /styles.css
+	handle @landing {
+		root * /app/landing
+		file_server
+	}
+
+	# React app (rooms)
+	handle {
+		root * /app/public
+		try_files {path} /index.html
+		file_server
+	}
+}
