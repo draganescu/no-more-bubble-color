@@ -7,7 +7,7 @@ services:
       - SERVER_NAME=${SERVER_NAME}
       - MERCURE_PUBLISHER_JWT_KEY=${MERCURE_PUBLISHER_JWT_KEY}
       - MERCURE_SUBSCRIBER_JWT_KEY=${MERCURE_SUBSCRIBER_JWT_KEY}
-      - MERCURE_HUB_URL=http://localhost/.well-known/mercure
+      - MERCURE_HUB_URL=${MERCURE_HUB_URL}
       - CHAT_DB_PATH=/data/chat.sqlite
     restart: unless-stopped
     volumes:
