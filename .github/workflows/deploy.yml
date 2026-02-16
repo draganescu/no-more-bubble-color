@@ -7,19 +7,20 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: staging
     steps:
       - name: Set up SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ github.ref_name == 'main' && secrets.DO_SSH_KEY || secrets.STAGING_DO_SSH_KEY }}
+          ssh-private-key: ${{ secrets.DO_SSH_KEY }}
 
       - name: Deploy
         env:
           BRANCH: ${{ github.ref_name }}
-          DO_HOST: ${{ github.ref_name == 'main' && secrets.DO_HOST || secrets.STAGING_DO_HOST }}
-          DO_USER: ${{ github.ref_name == 'main' && secrets.DO_USER || secrets.STAGING_DO_USER }}
-          DO_APP_DIR: ${{ github.ref_name == 'main' && secrets.DO_APP_DIR || secrets.STAGING_DO_APP_DIR }}
-          DO_SSH_PORT: ${{ github.ref_name == 'main' && secrets.DO_SSH_PORT || secrets.STAGING_DO_SSH_PORT }}
+          DO_HOST: ${{ secrets.DO_HOST }}
+          DO_USER: ${{ secrets.DO_USER }}
+          DO_APP_DIR: ${{ secrets.DO_APP_DIR }}
+          DO_SSH_PORT: ${{ secrets.DO_SSH_PORT }}
         run: |
           SSH_PORT=${DO_SSH_PORT:-22}
           ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" "$DO_USER@$DO_HOST" "cd $DO_APP_DIR && DEPLOY_BRANCH=$BRANCH ./scripts/deploy.sh"
