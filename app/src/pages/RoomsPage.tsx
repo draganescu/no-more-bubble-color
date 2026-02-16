@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getToken, listRooms, removeRoom, type StoredRoom } from '../lib/storage';
 
 const RoomsPage = () => {
   const [rooms, setRooms] = useState<StoredRoom[]>([]);
+  const [joinValue, setJoinValue] = useState('');
+  const [joinError, setJoinError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     setRooms(listRooms());
@@ -13,6 +17,30 @@ const RoomsPage = () => {
     setRooms(listRooms());
   };
 
+  const handleJoin = () => {
+    const trimmed = joinValue.trim();
+    if (!trimmed) {
+      setJoinError('Paste a room link or secret.');
+      return;
+    }
+    let secret = trimmed;
+    try {
+      if (trimmed.includes('://')) {
+        const url = new URL(trimmed);
+        secret = url.pathname.replace(/^\//, '');
+      }
+    } catch {
+      // If URL parsing fails, treat as raw secret.
+      secret = trimmed;
+    }
+    if (!secret) {
+      setJoinError('Invalid link or secret.');
+      return;
+    }
+    setJoinError('');
+    navigate(`/${secret}`);
+  };
+
   return (
     <main className="min-h-screen bg-[#efe7d5] text-[#171613]">
       <div className="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-16">
@@ -21,6 +49,27 @@ const RoomsPage = () => {
           <h1 className="mt-3 text-3xl font-semibold">Your rooms</h1>
           <p className="mt-2 text-sm text-[#3a362f]">Stored locally on this device only.</p>
         </header>
+
+        <section className="rounded-2xl border border-[#1716132e] bg-[#f7f2e6] p-6 shadow-[0_10px_24px_rgba(23,22,19,0.1)]">
+          <h2 className="text-lg font-semibold">Join with a link</h2>
+          <p className="mt-2 text-sm text-[#3a362f]">Paste a room URL or secret to join.</p>
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+            <input
+              className="flex-1 rounded-full border border-[#17161333] bg-white/80 px-4 py-2 text-sm"
+              placeholder="https://chatty.andreidraganescu.info/ROOM_SECRET"
+              value={joinValue}
+              onChange={(event) => setJoinValue(event.target.value)}
+            />
+            <button
+              className="rounded-full border-2 border-[#171613] bg-[#171613] px-5 py-2 text-sm font-semibold text-[#f6f0e8]"
+              onClick={handleJoin}
+              type="button"
+            >
+              Join
+            </button>
+          </div>
+          {joinError && <p className="mt-2 text-xs text-[#6b2411]">{joinError}</p>}
+        </section>
 
         {rooms.length === 0 && (
           <div className="rounded-2xl border border-[#1716132e] bg-[#f7f2e6] p-8">
