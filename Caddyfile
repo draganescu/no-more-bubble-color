@@ -7,8 +7,8 @@
 {$SERVER_NAME} {
 	# Mercure Hub
 	mercure {
-		publisher_jwt !ChangeMe!
-		subscriber_jwt !ChangeMe!
+		publisher_jwt {$MERCURE_PUBLISHER_JWT_KEY}
+		subscriber_jwt {$MERCURE_SUBSCRIBER_JWT_KEY}
 		anonymous
 	}
 
