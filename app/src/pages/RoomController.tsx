@@ -536,11 +536,15 @@ const RoomController = () => {
             </div>
           )}
 
-          <div className="flex flex-1 flex-col px-5 py-4">
+          <div className="flex flex-1 flex-col px-5 py-4 min-h-0">
             <p className="mb-3 text-xs text-[#3a362f]">
               {handle ? `You are ${handle}.` : 'Set a handle with /iam name.'}
             </p>
-            <div ref={listRef} onScroll={handleScroll} className="flex-1 overflow-y-auto pr-2 chat-scroll">
+            <div
+              ref={listRef}
+              onScroll={handleScroll}
+              className="flex-1 overflow-y-auto pr-2 chat-scroll min-h-0"
+            >
               <div className="flex flex-col gap-3">
                 {messages.length === 0 && <p className="text-sm text-[#3a362f]">No messages yet.</p>}
                 {messages.map((msg) => {
@@ -601,6 +605,10 @@ const RoomController = () => {
                   rows={2}
                   value={chatInput}
                   onChange={(event) => setChatInput(event.target.value)}
+                  onFocus={() => {
+                    setAutoScroll(true);
+                    requestAnimationFrame(scrollToBottom);
+                  }}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter' && !event.shiftKey) {
                       event.preventDefault();

@@ -57,11 +57,11 @@ body {
 .chat-scroll {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .chat-input {
   padding-bottom: calc(1rem + env(safe-area-inset-bottom));
-  transform: translateY(var(--app-offset));
 }
 
 @media (pointer: coarse) {
