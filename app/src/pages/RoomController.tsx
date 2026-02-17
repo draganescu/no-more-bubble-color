@@ -487,6 +487,247 @@ const RoomController = () => {
     );
   }
 
+  if (roomState === 'PARTICIPANT') {
+    return (
+      <main className="app-shell text-[#171613]">
+        <div className="mx-auto flex h-full w-full max-w-3xl flex-col">
+          <div className="flex items-center justify-between border-b border-[#1716132e] bg-[#f7f2e6] px-5 py-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-[#3a362f]">Chat for All</p>
+              <p className="text-sm text-[#3a362f]">
+                {connection === 'connected' ? 'Live' : connection === 'error' ? 'Reconnecting…' : 'Connecting…'}
+              </p>
+            </div>
+            <button
+              className="rounded-full border-2 border-[#171613] px-4 py-2 text-xs font-semibold"
+              onClick={() => setShowMenu(true)}
+              type="button"
+            >
+              Menu
+            </button>
+          </div>
+
+          {knocks.length > 0 && (
+            <div className="border-b border-[#1716132e] px-5 py-4">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3a362f]">Join requests</h2>
+              <div className="mt-3 flex flex-col gap-3">
+                {knocks.map((knock) => (
+                  <div key={knock.id} className="rounded-xl border border-[#1716132e] bg-white/80 p-4 text-sm">
+                    <p className="text-[#3a362f]">{knock.message ? `"${knock.message}"` : 'No message provided.'}</p>
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        className="rounded-full border-2 border-[#171613] bg-[#171613] px-4 py-1 text-xs font-semibold text-[#f6f0e8]"
+                        onClick={() => approveKnock(knock.id)}
+                        type="button"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        className="rounded-full border-2 border-[#171613] px-4 py-1 text-xs font-semibold"
+                        onClick={() => rejectKnock(knock.id)}
+                        type="button"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-1 flex-col px-5 py-4">
+            <p className="mb-3 text-xs text-[#3a362f]">
+              {handle ? `You are ${handle}.` : 'Set a handle with /iam name.'}
+            </p>
+            <div ref={listRef} onScroll={handleScroll} className="flex-1 overflow-y-auto pr-2 chat-scroll">
+              <div className="flex flex-col gap-3">
+                {messages.length === 0 && <p className="text-sm text-[#3a362f]">No messages yet.</p>}
+                {messages.map((msg) => {
+                  const isSelected = selectedId === msg.id;
+                  const isSystem = msg.type === 'system';
+                  return (
+                    <div key={msg.id} className={`flex flex-col ${msg.direction === 'out' ? 'items-end' : 'items-start'}`}>
+                      <button
+                        type="button"
+                        className={`max-w-[80%] rounded-2xl border px-4 py-2 text-left text-sm ${
+                          isSystem
+                            ? 'border-[#1716132e] bg-[#fef6e8] text-[#3a362f]'
+                            : msg.direction === 'out'
+                            ? 'border-[#171613] bg-[#171613] text-[#f6f0e8]'
+                            : 'border-[#1716132e] bg-white/80 text-[#171613]'
+                        }`}
+                        onClick={() => setSelectedId(isSelected ? null : msg.id)}
+                      >
+                        {msg.handle && !isSystem && <span className="mr-2 font-semibold">{msg.handle}</span>}
+                        {msg.content}
+                      </button>
+                      {isSelected && (
+                        <div className="mt-2 flex flex-wrap gap-2 text-xs text-[#3a362f]">
+                          <span>{new Date(msg.timestamp * 1000).toLocaleTimeString()}</span>
+                          <button type="button" className="underline" onClick={() => handleCopyMessage(msg.content)}>
+                            Copy
+                          </button>
+                          <button type="button" className="underline" onClick={() => handleDeleteMessage(msg.id)}>
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {!autoScroll && unreadCount > 0 && (
+              <button
+                className="mt-4 w-full rounded-full border-2 border-[#171613] bg-white/80 px-4 py-2 text-xs font-semibold"
+                onClick={() => {
+                  scrollToBottom();
+                  setAutoScroll(true);
+                  setUnreadCount(0);
+                }}
+                type="button"
+              >
+                {unreadCount} new message{unreadCount === 1 ? '' : 's'} · Jump to latest
+              </button>
+            )}
+
+            <div className="mt-4 border-t border-[#1716132e] pt-4 chat-input">
+              <div className="flex items-end gap-3">
+                <textarea
+                  className="flex-1 resize-none rounded-2xl border border-[#17161333] bg-white/80 px-4 py-3 text-base"
+                  placeholder="Type a message"
+                  rows={2}
+                  value={chatInput}
+                  onChange={(event) => setChatInput(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' && !event.shiftKey) {
+                      event.preventDefault();
+                      void sendMessage();
+                    }
+                  }}
+                />
+                <button
+                  className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#171613] bg-[#171613] text-[#f6f0e8]"
+                  onClick={sendMessage}
+                  type="button"
+                  aria-label="Send message"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="18"
+                    height="18"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M22 2L11 13" />
+                    <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <QrModal open={showQr} onClose={() => setShowQr(false)} value={shareUrl} />
+
+        {showDisband && (
+          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-6">
+            <div className="w-full max-w-sm rounded-2xl border border-[#1716132e] bg-[#f7f2e6] p-6 text-[#171613] shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+              <h2 className="text-xl font-semibold">Disband this room?</h2>
+              <p className="mt-2 text-sm text-[#3a362f]">
+                This removes the room from the server. Everyone will be disconnected. It cannot be undone.
+              </p>
+              <div className="mt-6 flex gap-3">
+                <button
+                  className="flex-1 rounded-full border-2 border-[#171613] px-4 py-2 text-sm font-semibold"
+                  onClick={() => setShowDisband(false)}
+                  type="button"
+                >
+                  Cancel
+                </button>
+                <button
+                  className="flex-1 rounded-full border-2 border-[#171613] bg-[#171613] px-4 py-2 text-sm font-semibold text-[#f6f0e8]"
+                  onClick={() => {
+                    setShowDisband(false);
+                    void disbandRoom();
+                  }}
+                  type="button"
+                >
+                  Disband
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showMenu && (
+          <div className="fixed inset-0 z-40 bg-black/40">
+            <div
+              className="absolute inset-0"
+              onClick={() => setShowMenu(false)}
+              onKeyDown={() => setShowMenu(false)}
+              role="button"
+              tabIndex={0}
+            />
+            <aside className="absolute right-0 top-0 h-full w-80 max-w-full border-l border-[#1716132e] bg-[#f7f2e6] p-6 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Room menu</h2>
+                <button className="text-sm underline" onClick={() => setShowMenu(false)} type="button">
+                  Close
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-[#3a362f]">Messages stay on this device only.</p>
+
+              <a className="mt-4 inline-block text-sm underline" href="/rooms">
+                Your rooms
+              </a>
+
+              <div className="mt-6 rounded-xl border border-dashed border-[#17161360] bg-[#fefaf2] p-4 text-sm">
+                <p className="font-semibold">Share link</p>
+                <p className="mt-2 break-all text-[#3a362f]">{shareUrl}</p>
+              </div>
+
+              <div className="mt-4 flex flex-col gap-3">
+                <button
+                  className="rounded-full border-2 border-[#171613] bg-[#171613] px-5 py-2 text-sm font-semibold text-[#f6f0e8]"
+                  onClick={handleCopy}
+                  type="button"
+                >
+                  Copy link
+                </button>
+                <button
+                  className="rounded-full border-2 border-[#171613] px-5 py-2 text-sm font-semibold"
+                  onClick={() => {
+                    setShowQr(true);
+                    setShowMenu(false);
+                  }}
+                  type="button"
+                >
+                  Show QR
+                </button>
+                <button
+                  className="rounded-full border-2 border-[#171613] px-5 py-2 text-sm font-semibold"
+                  onClick={() => {
+                    setShowDisband(true);
+                    setShowMenu(false);
+                  }}
+                  type="button"
+                >
+                  Disband room
+                </button>
+              </div>
+            </aside>
+          </div>
+        )}
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-[#efe7d5] text-[#171613]">
       <div className="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-16">
@@ -548,174 +789,6 @@ const RoomController = () => {
               >
                 Show QR
               </button>
-            </div>
-          </div>
-        )}
-
-        {roomState === 'PARTICIPANT' && (
-          <div className="fixed inset-0 bg-[#efe7d5] app-shell">
-            <div className="mx-auto flex h-full max-w-3xl flex-col overflow-hidden bg-[#f7f2e6]">
-              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#1716132e] bg-[#f7f2e6] px-5 py-4">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-[#3a362f]">Chat for All</p>
-                  <p className="text-sm text-[#3a362f]">
-                    {connection === 'connected' ? 'Live' : connection === 'error' ? 'Reconnecting…' : 'Connecting…'}
-                  </p>
-                </div>
-                <button
-                  className="rounded-full border-2 border-[#171613] px-4 py-2 text-xs font-semibold"
-                  onClick={() => setShowMenu(true)}
-                  type="button"
-                >
-                  Menu
-                </button>
-              </div>
-
-              {knocks.length > 0 && (
-                <div className="border-b border-[#1716132e] px-5 py-4">
-                  <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3a362f]">Join requests</h2>
-                  <div className="mt-3 flex flex-col gap-3">
-                    {knocks.map((knock) => (
-                      <div key={knock.id} className="rounded-xl border border-[#1716132e] bg-white/80 p-4 text-sm">
-                        <p className="text-[#3a362f]">
-                          {knock.message ? `"${knock.message}"` : 'No message provided.'}
-                        </p>
-                        <div className="mt-3 flex gap-2">
-                          <button
-                            className="rounded-full border-2 border-[#171613] bg-[#171613] px-4 py-1 text-xs font-semibold text-[#f6f0e8]"
-                            onClick={() => approveKnock(knock.id)}
-                            type="button"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            className="rounded-full border-2 border-[#171613] px-4 py-1 text-xs font-semibold"
-                            onClick={() => rejectKnock(knock.id)}
-                            type="button"
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="flex flex-1 flex-col px-5 py-4">
-                <p className="mb-3 text-xs text-[#3a362f]">
-                  {handle ? `You are ${handle}.` : 'Set a handle with /iam name.'}
-                </p>
-                <div
-                  ref={listRef}
-                  onScroll={handleScroll}
-                  className="flex-1 overflow-y-auto pr-2 chat-scroll"
-                >
-                  <div className="flex flex-col gap-3">
-                    {messages.length === 0 && (
-                      <p className="text-sm text-[#3a362f]">No messages yet.</p>
-                    )}
-                    {messages.map((msg) => {
-                      const isSelected = selectedId === msg.id;
-                      const isSystem = msg.type === 'system';
-                      return (
-                        <div
-                          key={msg.id}
-                          className={`flex flex-col ${msg.direction === 'out' ? 'items-end' : 'items-start'}`}
-                        >
-                          <button
-                            type="button"
-                            className={`max-w-[80%] rounded-2xl border px-4 py-2 text-left text-sm ${
-                              isSystem
-                                ? 'border-[#1716132e] bg-[#fef6e8] text-[#3a362f]'
-                                : msg.direction === 'out'
-                                ? 'border-[#171613] bg-[#171613] text-[#f6f0e8]'
-                                : 'border-[#1716132e] bg-white/80 text-[#171613]'
-                            }`}
-                            onClick={() => setSelectedId(isSelected ? null : msg.id)}
-                          >
-                            {msg.handle && !isSystem && (
-                              <span className="mr-2 font-semibold">{msg.handle}</span>
-                            )}
-                            {msg.content}
-                          </button>
-                          {isSelected && (
-                            <div className="mt-2 flex flex-wrap gap-2 text-xs text-[#3a362f]">
-                              <span>{new Date(msg.timestamp * 1000).toLocaleTimeString()}</span>
-                              <button
-                                type="button"
-                                className="underline"
-                                onClick={() => handleCopyMessage(msg.content)}
-                              >
-                                Copy
-                              </button>
-                              <button
-                                type="button"
-                                className="underline"
-                                onClick={() => handleDeleteMessage(msg.id)}
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {!autoScroll && unreadCount > 0 && (
-                  <button
-                    className="mt-4 w-full rounded-full border-2 border-[#171613] bg-white/80 px-4 py-2 text-xs font-semibold"
-                    onClick={() => {
-                      scrollToBottom();
-                      setAutoScroll(true);
-                      setUnreadCount(0);
-                    }}
-                    type="button"
-                  >
-                    {unreadCount} new message{unreadCount === 1 ? '' : 's'} · Jump to latest
-                  </button>
-                )}
-
-                <div className="sticky bottom-0 bg-[#f7f2e6] pt-4 chat-input">
-                  <div className="flex items-end gap-3 border-t border-[#1716132e] pt-4">
-                    <textarea
-                      className="flex-1 resize-none rounded-2xl border border-[#17161333] bg-white/80 px-4 py-3 text-base"
-                      placeholder="Type a message"
-                      rows={2}
-                      value={chatInput}
-                      onChange={(event) => setChatInput(event.target.value)}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter' && !event.shiftKey) {
-                          event.preventDefault();
-                          void sendMessage();
-                        }
-                      }}
-                    />
-                    <button
-                      className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#171613] bg-[#171613] text-[#f6f0e8]"
-                      onClick={sendMessage}
-                      type="button"
-                      aria-label="Send message"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        width="18"
-                        height="18"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M22 2L11 13" />
-                        <path d="M22 2L15 22L11 13L2 9L22 2Z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         )}
