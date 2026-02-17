@@ -542,151 +542,168 @@ const RoomController = () => {
         )}
 
         {roomState === 'PARTICIPANT' && (
-          <div className="flex min-h-[70vh] flex-col overflow-hidden rounded-2xl border border-[#1716132e] bg-[#f7f2e6] shadow-[0_12px_30px_rgba(23,22,19,0.12)]">
-            <div className="flex items-center justify-between border-b border-[#1716132e] px-5 py-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-[#3a362f]">Chat for All</p>
-                <p className="text-sm text-[#3a362f]">
-                  {connection === 'connected' ? 'Live' : connection === 'error' ? 'Reconnecting…' : 'Connecting…'}
-                </p>
-              </div>
-              <button
-                className="rounded-full border-2 border-[#171613] px-4 py-2 text-xs font-semibold"
-                onClick={() => setShowMenu(true)}
-                type="button"
-              >
-                Menu
-              </button>
-            </div>
-
-            {knocks.length > 0 && (
-              <div className="border-b border-[#1716132e] px-5 py-4">
-                <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3a362f]">Join requests</h2>
-                <div className="mt-3 flex flex-col gap-3">
-                  {knocks.map((knock) => (
-                    <div key={knock.id} className="rounded-xl border border-[#1716132e] bg-white/80 p-4 text-sm">
-                      <p className="text-[#3a362f]">
-                        {knock.message ? `"${knock.message}"` : 'No message provided.'}
-                      </p>
-                      <div className="mt-3 flex gap-2">
-                        <button
-                          className="rounded-full border-2 border-[#171613] bg-[#171613] px-4 py-1 text-xs font-semibold text-[#f6f0e8]"
-                          onClick={() => approveKnock(knock.id)}
-                          type="button"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          className="rounded-full border-2 border-[#171613] px-4 py-1 text-xs font-semibold"
-                          onClick={() => rejectKnock(knock.id)}
-                          type="button"
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+          <div className="fixed inset-0 bg-[#efe7d5]">
+            <div className="mx-auto flex h-full max-w-3xl flex-col overflow-hidden border-x border-[#1716132e] bg-[#f7f2e6] shadow-[0_12px_30px_rgba(23,22,19,0.12)]">
+              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#1716132e] bg-[#f7f2e6] px-5 py-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-[#3a362f]">Chat for All</p>
+                  <p className="text-sm text-[#3a362f]">
+                    {connection === 'connected' ? 'Live' : connection === 'error' ? 'Reconnecting…' : 'Connecting…'}
+                  </p>
                 </div>
-              </div>
-            )}
-
-            <div className="flex flex-1 flex-col px-5 py-4">
-              <p className="mb-3 text-xs text-[#3a362f]">
-                {handle ? `You are ${handle}.` : 'Set a handle with /iam name.'}
-              </p>
-              <div
-                ref={listRef}
-                onScroll={handleScroll}
-                className="flex-1 overflow-y-auto pr-2"
-              >
-                <div className="flex flex-col gap-3">
-                  {messages.length === 0 && (
-                    <p className="text-sm text-[#3a362f]">No messages yet.</p>
-                  )}
-                  {messages.map((msg) => {
-                    const isSelected = selectedId === msg.id;
-                    const isSystem = msg.type === 'system';
-                    return (
-                      <div
-                        key={msg.id}
-                        className={`flex flex-col ${msg.direction === 'out' ? 'items-end' : 'items-start'}`}
-                      >
-                        <button
-                          type="button"
-                          className={`max-w-[80%] rounded-2xl border px-4 py-2 text-left text-sm ${
-                            isSystem
-                              ? 'border-[#1716132e] bg-[#fef6e8] text-[#3a362f]'
-                              : msg.direction === 'out'
-                              ? 'border-[#171613] bg-[#171613] text-[#f6f0e8]'
-                              : 'border-[#1716132e] bg-white/80 text-[#171613]'
-                          }`}
-                          onClick={() => setSelectedId(isSelected ? null : msg.id)}
-                        >
-                          {msg.handle && !isSystem && (
-                            <span className="mr-2 font-semibold">{msg.handle}</span>
-                          )}
-                          {msg.content}
-                        </button>
-                        {isSelected && (
-                          <div className="mt-2 flex flex-wrap gap-2 text-xs text-[#3a362f]">
-                            <span>{new Date(msg.timestamp * 1000).toLocaleTimeString()}</span>
-                            <button
-                              type="button"
-                              className="underline"
-                              onClick={() => handleCopyMessage(msg.content)}
-                            >
-                              Copy
-                            </button>
-                            <button
-                              type="button"
-                              className="underline"
-                              onClick={() => handleDeleteMessage(msg.id)}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {!autoScroll && unreadCount > 0 && (
                 <button
-                  className="mt-4 w-full rounded-full border-2 border-[#171613] bg-white/80 px-4 py-2 text-xs font-semibold"
-                  onClick={() => {
-                    scrollToBottom();
-                    setAutoScroll(true);
-                    setUnreadCount(0);
-                  }}
+                  className="rounded-full border-2 border-[#171613] px-4 py-2 text-xs font-semibold"
+                  onClick={() => setShowMenu(true)}
                   type="button"
                 >
-                  {unreadCount} new message{unreadCount === 1 ? '' : 's'} · Jump to latest
+                  Menu
                 </button>
+              </div>
+
+              {knocks.length > 0 && (
+                <div className="border-b border-[#1716132e] px-5 py-4">
+                  <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3a362f]">Join requests</h2>
+                  <div className="mt-3 flex flex-col gap-3">
+                    {knocks.map((knock) => (
+                      <div key={knock.id} className="rounded-xl border border-[#1716132e] bg-white/80 p-4 text-sm">
+                        <p className="text-[#3a362f]">
+                          {knock.message ? `"${knock.message}"` : 'No message provided.'}
+                        </p>
+                        <div className="mt-3 flex gap-2">
+                          <button
+                            className="rounded-full border-2 border-[#171613] bg-[#171613] px-4 py-1 text-xs font-semibold text-[#f6f0e8]"
+                            onClick={() => approveKnock(knock.id)}
+                            type="button"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            className="rounded-full border-2 border-[#171613] px-4 py-1 text-xs font-semibold"
+                            onClick={() => rejectKnock(knock.id)}
+                            type="button"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
 
-              <div className="mt-4 flex flex-col gap-3 border-t border-[#1716132e] pt-4">
-                <textarea
-                  className="w-full rounded-xl border border-[#17161333] bg-white/80 p-3 text-sm"
-                  placeholder="Type a message"
-                  rows={2}
-                  value={chatInput}
-                  onChange={(event) => setChatInput(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' && !event.shiftKey) {
-                      event.preventDefault();
-                      void sendMessage();
-                    }
-                  }}
-                />
-                <button
-                  className="rounded-full border-2 border-[#171613] bg-[#171613] px-5 py-2 text-sm font-semibold text-[#f6f0e8]"
-                  onClick={sendMessage}
-                  type="button"
+              <div className="flex flex-1 flex-col px-5 py-4">
+                <p className="mb-3 text-xs text-[#3a362f]">
+                  {handle ? `You are ${handle}.` : 'Set a handle with /iam name.'}
+                </p>
+                <div
+                  ref={listRef}
+                  onScroll={handleScroll}
+                  className="flex-1 overflow-y-auto pr-2"
                 >
-                  Send
-                </button>
+                  <div className="flex flex-col gap-3">
+                    {messages.length === 0 && (
+                      <p className="text-sm text-[#3a362f]">No messages yet.</p>
+                    )}
+                    {messages.map((msg) => {
+                      const isSelected = selectedId === msg.id;
+                      const isSystem = msg.type === 'system';
+                      return (
+                        <div
+                          key={msg.id}
+                          className={`flex flex-col ${msg.direction === 'out' ? 'items-end' : 'items-start'}`}
+                        >
+                          <button
+                            type="button"
+                            className={`max-w-[80%] rounded-2xl border px-4 py-2 text-left text-sm ${
+                              isSystem
+                                ? 'border-[#1716132e] bg-[#fef6e8] text-[#3a362f]'
+                                : msg.direction === 'out'
+                                ? 'border-[#171613] bg-[#171613] text-[#f6f0e8]'
+                                : 'border-[#1716132e] bg-white/80 text-[#171613]'
+                            }`}
+                            onClick={() => setSelectedId(isSelected ? null : msg.id)}
+                          >
+                            {msg.handle && !isSystem && (
+                              <span className="mr-2 font-semibold">{msg.handle}</span>
+                            )}
+                            {msg.content}
+                          </button>
+                          {isSelected && (
+                            <div className="mt-2 flex flex-wrap gap-2 text-xs text-[#3a362f]">
+                              <span>{new Date(msg.timestamp * 1000).toLocaleTimeString()}</span>
+                              <button
+                                type="button"
+                                className="underline"
+                                onClick={() => handleCopyMessage(msg.content)}
+                              >
+                                Copy
+                              </button>
+                              <button
+                                type="button"
+                                className="underline"
+                                onClick={() => handleDeleteMessage(msg.id)}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {!autoScroll && unreadCount > 0 && (
+                  <button
+                    className="mt-4 w-full rounded-full border-2 border-[#171613] bg-white/80 px-4 py-2 text-xs font-semibold"
+                    onClick={() => {
+                      scrollToBottom();
+                      setAutoScroll(true);
+                      setUnreadCount(0);
+                    }}
+                    type="button"
+                  >
+                    {unreadCount} new message{unreadCount === 1 ? '' : 's'} · Jump to latest
+                  </button>
+                )}
+
+                <div className="sticky bottom-0 bg-[#f7f2e6] pt-4">
+                  <div className="flex items-end gap-3 border-t border-[#1716132e] pt-4">
+                    <textarea
+                      className="flex-1 resize-none rounded-2xl border border-[#17161333] bg-white/80 px-4 py-3 text-sm"
+                      placeholder="Type a message"
+                      rows={2}
+                      value={chatInput}
+                      onChange={(event) => setChatInput(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' && !event.shiftKey) {
+                          event.preventDefault();
+                          void sendMessage();
+                        }
+                      }}
+                    />
+                    <button
+                      className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#171613] bg-[#171613] text-[#f6f0e8]"
+                      onClick={sendMessage}
+                      type="button"
+                      aria-label="Send message"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="18"
+                        height="18"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M22 2L11 13" />
+                        <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
